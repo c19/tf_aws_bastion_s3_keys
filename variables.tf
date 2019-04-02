@@ -114,3 +114,7 @@ variable "enabled" {
   default     = true
   description = "Whether to create bastion or not."
 }
+
+variable "dependencies" {
+  type = "list"
+}

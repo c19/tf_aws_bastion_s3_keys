@@ -1,3 +1,18 @@
+provider "aws" {}
+
+# Part of a hack for module-to-module dependencies.
+# https://github.com/hashicorp/terraform/issues/1178#issuecomment-449158607
+# and
+# https://github.com/hashicorp/terraform/issues/1178#issuecomment-473091030
+# Make sure to add this null_resource.dependency_getter to the `depends_on`
+# attribute to all resource(s) that will be constructed first within this
+# module:
+resource "null_resource" "dependency_getter" {
+  triggers {
+    my_dependencies = "${join(",", var.dependencies)}"
+  }
+}
+
 resource "aws_security_group" "bastion" {
   count       = "${var.enabled}"
   name        = "${var.name}"
@@ -144,4 +159,20 @@ resource "aws_autoscaling_group" "bastion" {
   lifecycle {
     create_before_destroy = true
   }
+}
+
+# Part of a hack for module-to-module dependencies.
+# https://github.com/hashicorp/terraform/issues/1178#issuecomment-449158607
+resource "null_resource" "dependency_setter" {
+  # Part of a hack for module-to-module dependencies.
+  # https://github.com/hashicorp/terraform/issues/1178#issuecomment-449158607
+  # List resource(s) that will be constructed last within the module.
+  depends_on = [
+    "aws_security_group.bastion",
+    "aws_security_group_rule.ssh_ingress",
+    "aws_security_group_rule.ssh_sg_ingress",
+    "aws_security_group_rule.bastion_all_egress",
+    "aws_launch_configuration.bastion",
+    "aws_autoscaling_group.bastion",
+  ]
 }
