@@ -116,5 +116,6 @@ variable "enabled" {
 }
 
 variable "dependencies" {
-  type = "list"
+  default = []
+  type    = "list"
 }
