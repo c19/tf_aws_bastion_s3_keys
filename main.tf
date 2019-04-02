@@ -22,6 +22,10 @@ resource "aws_security_group" "bastion" {
   tags {
     Name = "${var.name}"
   }
+
+  depends_on = [
+    "null_resource.dependency_getter",
+  ]
 }
 
 resource "aws_security_group_rule" "ssh_ingress" {
@@ -116,6 +120,10 @@ resource "aws_launch_configuration" "bastion" {
   lifecycle {
     create_before_destroy = true
   }
+
+  depends_on = [
+    "null_resource.dependency_getter",
+  ]
 }
 
 resource "aws_autoscaling_group" "bastion" {
